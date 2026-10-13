@@ -30,7 +30,7 @@ function makeEpisode(ep){
  a.addEventListener('mouseenter',()=>{a.style.borderColor='var(--orange)';a.style.transform='translateY(-3px)';});a.addEventListener('mouseleave',()=>{a.style.borderColor='var(--line)';a.style.transform='';});return a;
 }
 function renderEpisodes(eps){const el=$('#episode-list');if(el)el.replaceChildren(...eps.slice(0,EPISODE_COUNT).map(makeEpisode));}
-function decode(s){const node=document.createElement('textarea');node.innerHTML=String(s||'');return node.value.replace(/\s+/g,' ').trim();}
+function decode(s){const doc=new DOMParser().parseFromString(String(s||''),'text/html');return (doc.body.textContent||'').replace(/\s+/g,' ').trim();}
 function duration(dur){const s=String(dur||'').trim();if(!s)return '';let sec=0;if(s.includes(':'))s.split(':').map(Number).forEach(n=>sec=sec*60+(n||0));else sec=Number(s)||0;return sec?Math.max(1,Math.round(sec/60))+' MIN':'';}
 function clip(s){return s.length<=120?s:s.slice(0,120).replace(/\s+\S*$/,'')+'…';}
 async function loadEpisodes(){renderEpisodes(FALLBACK_EPISODES);try{const r=await fetch(SHEET_ENDPOINT+'?action=episodes');const data=await r.json();if(data&&data.ok&&Array.isArray(data.episodes)&&data.episodes.length){renderEpisodes(data.episodes.map(e=>({url:e.url,title:decode(e.title),meta:duration(e.duration),blurb:clip(decode(e.description))})));}}catch(e){/* Existing fallback remains visible. */}}
